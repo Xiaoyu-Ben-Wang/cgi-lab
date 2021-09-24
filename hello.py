@@ -36,28 +36,24 @@ def main():
     form = cgi.FieldStorage()
     username = form.getvalue("username")
     password = form.getvalue("password")
-    if not (username and password):
+
+    cookies = [c.strip() for c in os.environ.get("HTTP_COOKIE").split(';')]
+    login_cookie = "LoggedIn=true" in cookies
+    if login_cookie:
+        print(templates.secret_page(secret.username, secret.password))
+
+    elif not (username and password):
         print(templates.login_page())
     else:
-
         login_immediate = False
-        if username==secret.username and password==secret.password:
+        if username == secret.username and password == secret.password:
             print("Set-Cookie:LoggedIn=true;", end="")
-            print("Set-Cookie:TestCookie=true;\r\n")
             login_immediate = True
 
-
-
-        cookies = [c.strip() for c in os.environ.get("HTTP_COOKIE").split(';')]
-
-        login_cookie = "LoggedIn=true" in cookies
-        if login_cookie or login_immediate:
+        if login_immediate:
             print(templates.secret_page(username, password))
         else:
             print(templates.after_login_incorrect())
-
-
-
 
 
 if __name__ == '__main__':
